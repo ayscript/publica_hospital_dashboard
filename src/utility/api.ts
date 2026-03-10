@@ -1,6 +1,6 @@
 // src/api.ts
 
-const BASE_URL = "http://localhost:3000";
+const BASE_URL = "http://localhost:3000/api";
 
 // A core function to handle the actual fetching, error checking, and JSON parsing
 async function fetchWrapper<T>(

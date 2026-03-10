@@ -3,6 +3,9 @@ import { ChevronDown, Plus } from "lucide-react";
 import { api } from "../../utility/api";
 import { PatientSkeleton } from "../../components/loading/PatientLoading";
 import PatientTable from "./Table";
+import { Lens } from "../../components/Icons";
+import PatientEnrollmentForm from "../../components/PatientEnrollmentForm";
+import { useState } from "react";
 
 const Patients = () => {
   const {
@@ -18,18 +21,37 @@ const Patients = () => {
     },
   );
 
-  console.log(data);
+  const [showEnrollmentForm, setShowEnrollmentForm] = useState(false)
+
   return (
     <div>
       <div className="border-b border-[#CFCFCF] py-6 px-[5%] flex items-center justify-between">
         <h1 className="text-2xl">Patients</h1>
         <button
           aria-label="Add Patient"
-          className="flex gap-2 font-bold bg-blue-600 text-white p-4 py-3"
+          className="flex gap-2 font-bold bg-blue-600 text-white p-4 py-3 ml-auto"
+          onClick={() => {
+            setShowEnrollmentForm(!showEnrollmentForm)
+          }}
         >
           <Plus />
           Add Patient
         </button>
+        {showEnrollmentForm ? <div className="fixed top-0 left-0 w-full h-full bg-gray-800/70 backdrop-blur-xs flex items-center justify-center z-50" onClick={e => {
+          if (e.target === e.currentTarget) {
+            setShowEnrollmentForm(false)
+          }
+        }}>
+          <button className="px-4 py-2 bg-white absolute top-4 right-4" onClick={() => {
+            setShowEnrollmentForm(false)
+          }}>Close</button>
+          <PatientEnrollmentForm />
+        </div> : null}
+        <div>
+          <form>
+
+          </form>
+        </div>
       </div>
       {isLoading && !data ? (
         <PatientSkeleton />
@@ -50,9 +72,12 @@ const Patients = () => {
             >
               Hospital ID <ChevronDown />
             </button>
-            <input type="text" className="ml-auto border border-gray-400" />
+            <div className="relative ml-auto">
+              <Lens className="absolute  top-4 left-2" />
+              <input type="text" placeholder="Search by patient name, id" className="ml-auto border border-gray-400 placeholder:text-sm px-4 py-2 pl-8" />
+            </div>
           </div>
-          <PatientTable data={data} />
+          <PatientTable data={data.data} totalPages={data.totalPages} deliveries={data.deliveries} />
         </div>
       )}
     </div>
