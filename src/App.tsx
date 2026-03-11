@@ -2,30 +2,33 @@ import { Link } from "react-router";
 // import Hero from "./components/Hero";
 import { useAuthStore } from "./store/authStore";
 import { useState } from "react";
+import { useNavigate } from "react-router";
 
 const App = () => {
-  const { login, loading } = useAuthStore();
+  const { login, loading, error, setError } = useAuthStore();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
+
+  const navigate = useNavigate()
+
   const [showPassword, setShowPassword] = useState(false)
-  const [error, setError] = useState("")
+  // const [error, setError] = useState("")
 
   function handleChange(e: HTMLInputElement) {
-    if (e.value.trim()) {
       setFormData((prev) => {
         return { ...prev, [e.name]: e.value };
       });
-    }
   }
 
   async function handleSubmit() {
     try {
       await login(formData.email, formData.password)
+      // navigate("/dashboard")
       
     } catch (err) {
-       setError("An error occured")
+       setError(err instanceof Error ? err.message : "An error occurred");
     }
   }
 
@@ -39,14 +42,17 @@ const App = () => {
         }}>
           <h3 className="text-5 font-semibold">Sign in to continue</h3>
           {
-            error ? <div className="p-4 border-l-3 border-red-700">{error}</div> : null
+            error ? <div className="p-4 border-l-3 border-red-700 bg-red-100">{error}</div> : null
           }
           <div className="relative w-full">
             <input
               type="text"
               name="email"
               value={formData.email}
-              onChange={e => handleChange(e.target)}
+              onChange={e => {
+                setError("")
+                handleChange(e.target)
+              }}
               placeholder="Email Address"
               className="border w-full py-3 pl-4"
             />
@@ -56,7 +62,10 @@ const App = () => {
               type={showPassword ? "text" : "password"}
               name="password"
               value={formData.password}
-              onChange={e => handleChange(e.target)}
+              onChange={e => {
+                setError("")
+                handleChange(e.target)
+              }}
               placeholder="Password"
               className="border w-full py-3 pl-4"
             />

@@ -21,10 +21,11 @@ interface PatientDelivery {
 interface PatientTableProps {
   data: PatientDelivery[];
   totalPages: number;
-  deliveries: number
+  deliveries: number;
+  setPage: React.Dispatch<React.SetStateAction<string>>
 }
 
-const PatientTable: React.FC<PatientTableProps> = ({ data, totalPages, deliveries }) => {
+const PatientTable: React.FC<PatientTableProps> = ({ data, totalPages, deliveries, setPage }) => {
   // Type-safe style mapper
   const getStatusStyles = (status: DeliveryStatus): string => {
     const base =
@@ -50,6 +51,7 @@ const PatientTable: React.FC<PatientTableProps> = ({ data, totalPages, deliverie
 
   const handlePageChange = (newPage: number) => {
     // You can add your API fetching logic here
+    setPage(String(newPage))
     setCurrentPage(newPage);
   };
 

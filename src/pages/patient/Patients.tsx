@@ -8,6 +8,7 @@ import PatientEnrollmentForm from "../../components/PatientEnrollmentForm";
 import { useState } from "react";
 
 const Patients = () => {
+  const [page, setPage] = useState("1")
   const {
     data,
     isLoading,
@@ -15,9 +16,8 @@ const Patients = () => {
     isError,
   }: { data: any; isLoading: boolean; error: any; isError: boolean } = useQuery(
     {
-      queryKey: ["patients"],
-      // Using api.get with the expected return type
-      queryFn: () => api.get("/patients"),
+      queryKey: ["patients", page],
+      queryFn: () => api.get(`/patients?page=${page}`),
     },
   );
 
@@ -77,7 +77,7 @@ const Patients = () => {
               <input type="text" placeholder="Search by patient name, id" className="ml-auto border border-gray-400 placeholder:text-sm px-4 py-2 pl-8" />
             </div>
           </div>
-          <PatientTable data={data.data} totalPages={data.totalPages} deliveries={data.deliveries} />
+          <PatientTable data={data.data} totalPages={data.totalPages} deliveries={data.deliveries} setPage={setPage} />
         </div>
       )}
     </div>

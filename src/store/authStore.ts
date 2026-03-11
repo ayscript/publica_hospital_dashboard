@@ -2,36 +2,46 @@ import { create } from "zustand";
 
 interface AuthType {
   user: {
-    fullName: string;
+    user_name: string;
     email: string;
-    password: string;
-    accessToken?: string;
+    user_id: string;
   };
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, user_id: string) => Promise<void>;
   loading: boolean;
+  error: string;
+  setError: (error: string) => void
 }
 
 export const useAuthStore = create<AuthType>((set) => ({
-  user: { fullName: "", email: "", password: "", accessToken: "" },
+  user: { user_name: "", email: "", user_id: "" },
   loading: false,
+  error: "",
+  setError: (error: string) => {
+    set({error})
+  },
   login: async (email: string, password: string) => {
     try {
       set({ loading: true });
-      const response = await fetch("http://localhost:3000/users");
-      const data: AuthType["user"][] = await response.json();
+      const response = await fetch("http://localhost:3000/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({email, password})
+      });
 
-      if (!response.ok) {
-        return;
+      const data: any = await response.json();
+
+      if(!response.ok){
+        throw new Error(data?.message || "An error occured")
       }
-      const userDetails = data.filter(
-        (item) => item.email === email && item.password === password,
-      );
-      console.log(userDetails);
-      if (userDetails[0]) {
-        set({ user: userDetails[0] });
-      }
+
+      localStorage.setItem("auth_token", data?.token)
+      set({user: data.user})
+      console.log(data)
     } catch (error) {
       console.log(error);
+      set({error: error instanceof Error ? error.message : "An error occurred"})
     } finally {
       set({ loading: false });
     }
