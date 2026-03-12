@@ -31,7 +31,7 @@ const Patients = () => {
 
   return (
     <div>
-      <div className="border-b border-[#CFCFCF] py-6 px-[5%] flex items-center justify-between">
+      <div className="border-b border-[#CFCFCF] py-6 px-[5%] flex items-center justify-between flex-1">
         <h1 className="text-2xl">Patients</h1>
         <button
           aria-label="Add Patient"
@@ -65,9 +65,6 @@ const Patients = () => {
             <PatientEnrollmentForm isOpen={showEnrollmentForm} />
           </div>
         ) : null}
-        <div>
-          <form></form>
-        </div>
       </div>
       {isLoading && !data ? (
         <PatientSkeleton />

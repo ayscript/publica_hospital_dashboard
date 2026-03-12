@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import Pagination from "../../components/Pagination";
+import { Link } from "react-router";
 
 type DeliveryStatus =
   | "Completed"
@@ -22,10 +23,15 @@ interface PatientTableProps {
   data: PatientDelivery[];
   totalPages: number;
   deliveries: number;
-  setPage: React.Dispatch<React.SetStateAction<number>>
+  setPage: React.Dispatch<React.SetStateAction<number>>;
 }
 
-const PatientTable: React.FC<PatientTableProps> = ({ data, totalPages, deliveries, setPage }) => {
+const PatientTable: React.FC<PatientTableProps> = ({
+  data,
+  totalPages,
+  deliveries,
+  setPage,
+}) => {
   // Type-safe style mapper
   const getStatusStyles = (status: DeliveryStatus): string => {
     const base =
@@ -51,7 +57,7 @@ const PatientTable: React.FC<PatientTableProps> = ({ data, totalPages, deliverie
 
   const handlePageChange = (newPage: number) => {
     // You can add your API fetching logic here
-    setPage(newPage)
+    setPage(newPage);
     setCurrentPage(newPage);
   };
 
@@ -80,41 +86,34 @@ const PatientTable: React.FC<PatientTableProps> = ({ data, totalPages, deliverie
         </thead>
         <tbody className="divide-y divide-gray-50">
           {data.map((item, index) => (
-            <tr
-              key={index}
-              className="hover:bg-gray-50/50 transition-colors"
-            >
-              <td className="px-6 py-4 text-xs ">
-                {item.hospitalId}
-              </td>
+            <tr key={index} className="hover:bg-gray-50/50 transition-colors">
+              <td className="px-6 py-4 text-xs ">{item.hospitalId}</td>
               <td className="px-6 py-4 text-xs font-semibold text-gray-700">
                 {item.patientName}
               </td>
-              <td className="px-6 py-4 text-xs ">
-                {item.phoneNumber}
-              </td>
-              <td className="px-6 py-4 text-xs ">
-                {item.nextDeliveryDate}
-              </td>
-              <td className="px-6 py-4 text-xs ">
-                {item.location}
-              </td>
+              <td className="px-6 py-4 text-xs ">{item.phoneNumber}</td>
+              <td className="px-6 py-4 text-xs ">{item.nextDeliveryDate}</td>
+              <td className="px-6 py-4 text-xs ">{item.location}</td>
               <td className="px-6 py-4">
                 <span className={getStatusStyles(item.status)}>
                   {item.status}
                 </span>
               </td>
               <td className="px-6 py-4 text-right">
-                <button className="text-blue-500 border border-blue-200 px-5 py-1.5 hover:bg-blue-500 hover:text-white hover:border-blue-500 transition-all text-xs font-medium">
+                <Link to="/dashboard/patient" className="text-blue-500 border border-blue-200 px-5 py-1.5 hover:bg-blue-500 hover:text-white hover:border-blue-500 transition-all text-xs font-medium">
                   View
-                </button>
+                </Link>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
       <div className="flex flex-wrap items-center justify-between border-t border-gray-50">
-        <div className="px-6 py-4 text-xs text-gray-500"><p>You're viewing {data.length} out of {deliveries || ""} deliveries</p></div>
+        <div className="px-6 py-4 text-xs text-gray-500">
+          <p>
+            You're viewing {data.length} out of {deliveries || ""} deliveries
+          </p>
+        </div>
         <div className="px-6 py-4 text-xs text-gray-500">
           <Pagination
             currentPage={currentPage}
