@@ -1,14 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
-import { ChevronDown, Plus } from "lucide-react";
+import { ChevronDown, Plus, X } from "lucide-react";
 import { api } from "../../utility/api";
 import { PatientSkeleton } from "../../components/loading/PatientLoading";
 import PatientTable from "./Table";
 import { Lens } from "../../components/Icons";
 import PatientEnrollmentForm from "../../components/PatientEnrollmentForm";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { useFocusTrap } from "../../hooks/usFocusTrap";
 
 const Patients = () => {
-  const [page, setPage] = useState("1")
+  const [page, setPage] = useState(1);
+  const modalRef = useRef<HTMLDivElement>(null);
+
   const {
     data,
     isLoading,
@@ -18,10 +21,13 @@ const Patients = () => {
     {
       queryKey: ["patients", page],
       queryFn: () => api.get(`/patients?page=${page}`),
+      placeholderData: (previousData) => previousData,
     },
   );
 
-  const [showEnrollmentForm, setShowEnrollmentForm] = useState(false)
+  const [showEnrollmentForm, setShowEnrollmentForm] = useState(false);
+
+  useFocusTrap(showEnrollmentForm, modalRef);
 
   return (
     <div>
@@ -31,26 +37,36 @@ const Patients = () => {
           aria-label="Add Patient"
           className="flex gap-2 font-bold bg-blue-600 text-white p-4 py-3 ml-auto"
           onClick={() => {
-            setShowEnrollmentForm(!showEnrollmentForm)
+            setShowEnrollmentForm(!showEnrollmentForm);
           }}
         >
           <Plus />
           Add Patient
         </button>
-        {showEnrollmentForm ? <div className="fixed top-0 left-0 w-full h-full bg-gray-800/70 backdrop-blur-xs flex items-center justify-center z-50" onClick={e => {
-          if (e.target === e.currentTarget) {
-            setShowEnrollmentForm(false)
-          }
-        }}>
-          <button className="px-4 py-2 bg-white absolute top-4 right-4" onClick={() => {
-            setShowEnrollmentForm(false)
-          }}>Close</button>
-          <PatientEnrollmentForm />
-        </div> : null}
+        {showEnrollmentForm ? (
+          <div
+            className="fixed top-0 left-0 w-full h-full bg-gray-800/70 backdrop-blur-xs flex items-center justify-center z-50"
+            ref={modalRef}
+            onClick={(e) => {
+              if (e.target === e.currentTarget) {
+                setShowEnrollmentForm(false);
+              }
+            }}
+          >
+            <button
+              className="px-4 py-1 rounded border border-gray-100 bg-white absolute top-4 right-4"
+              aria-label="Close"
+              onClick={() => {
+                setShowEnrollmentForm(false);
+              }}
+            >
+              <X />
+            </button>
+            <PatientEnrollmentForm isOpen={showEnrollmentForm} />
+          </div>
+        ) : null}
         <div>
-          <form>
-
-          </form>
+          <form></form>
         </div>
       </div>
       {isLoading && !data ? (
@@ -64,20 +80,31 @@ const Patients = () => {
         </div>
       ) : (
         <div className="flex flex-col gap-8 py-4 px-[5%]">
-          <div className="flex gap-3">
-            <p>Sort by</p>
-            <button
-              className="flex gap-3 font-semibold"
-              aria-label="Hospital ID"
-            >
-              Hospital ID <ChevronDown />
-            </button>
-            <div className="relative ml-auto">
+          <div className="flex gap-3 flex-wrap">
+            <div className="flex gap-3 items-center">
+              <p>Sort by: </p>
+              <button
+                className="flex gap-3 font-semibold bg-gray-200 px-3 py-2 rounded-3xl"
+                aria-label="Hospital ID"
+              >
+                Hospital ID <ChevronDown />
+              </button>
+            </div>
+            <div className="relative sm:ml-auto max-sm:w-full z-10">
               <Lens className="absolute  top-4 left-2" />
-              <input type="text" placeholder="Search by patient name, id" className="ml-auto border border-gray-400 placeholder:text-sm px-4 py-2 pl-8" />
+              <input
+                type="search"
+                placeholder="Search by patient name, id"
+                className="ml-auto border border-gray-400 placeholder:text-sm px-4 py-2 pl-8 w-full"
+              />
             </div>
           </div>
-          <PatientTable data={data.data} totalPages={data.totalPages} deliveries={data.deliveries} setPage={setPage} />
+          <PatientTable
+            data={data.data}
+            totalPages={data.totalPages}
+            deliveries={data.deliveries}
+            setPage={setPage}
+          />
         </div>
       )}
     </div>

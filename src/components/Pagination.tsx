@@ -27,7 +27,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }: {currentPage: num
     const pages = getPages();
 
     return (
-        <div className="flex items-center space-x-2 text-sm text-gray-500">
+        <div className="flex items-center space-x-1 text-sm text-gray-500">
             {/* Prev Button */}
             <button
                 onClick={() => onPageChange(currentPage - 1)}

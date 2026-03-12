@@ -5,30 +5,40 @@ import { useState } from "react";
 import { useNavigate } from "react-router";
 
 const App = () => {
-  const { login, loading, error, setError } = useAuthStore();
+  const { login, loading, setLoading, error, setError } = useAuthStore();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
-  const [showPassword, setShowPassword] = useState(false)
+  const [showPassword, setShowPassword] = useState(false);
   // const [error, setError] = useState("")
 
   function handleChange(e: HTMLInputElement) {
-      setFormData((prev) => {
-        return { ...prev, [e.name]: e.value };
-      });
+    setFormData((prev) => {
+      return { ...prev, [e.name]: e.value };
+    });
   }
 
   async function handleSubmit() {
+    // try {
+    //   await login(formData.email, formData.password)
+    //   // navigate("/dashboard")
+
+    // } catch (err) {
+    //    setError(err instanceof Error ? err.message : "An error occurred");
+    // }
     try {
-      await login(formData.email, formData.password)
-      // navigate("/dashboard")
-      
-    } catch (err) {
-       setError(err instanceof Error ? err.message : "An error occurred");
+      await login(formData.email, formData.password);
+      navigate("/dashboard");
+    } catch (error) {
+      console.log(error);
+      setError(error instanceof Error ? error.message : "An error occurred");
+    } finally {
+      setLoading(false);
+      // set({ loading: false });
     }
   }
 
@@ -36,22 +46,28 @@ const App = () => {
     <div className="flex items-center h-dvh overflow-hidden">
       <div className="h-full w-full sm:w-1/2 flex flex-col items-center justify-between p-4 sm:p-9">
         <img src="/assets/logo.png" className="w-14.5 h-14.5" alt="" />
-        <form className="flex flex-col gap-8 w-3/4" onSubmit={e => {
-          e.preventDefault()
-          handleSubmit()
-        }}>
+        <form
+          className="flex flex-col gap-8 w-3/4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            setError("");
+            handleSubmit();
+          }}
+        >
           <h3 className="text-5 font-semibold">Sign in to continue</h3>
-          {
-            error ? <div className="p-4 border-l-3 border-red-700 bg-red-100">{error}</div> : null
-          }
+          {error ? (
+            <div className="p-4 border-l-3 border-red-700 bg-red-100">
+              {error}
+            </div>
+          ) : null}
           <div className="relative w-full">
             <input
               type="text"
               name="email"
               value={formData.email}
-              onChange={e => {
-                setError("")
-                handleChange(e.target)
+              onChange={(e) => {
+                setError("");
+                handleChange(e.target);
               }}
               placeholder="Email Address"
               className="border w-full py-3 pl-4"
@@ -62,14 +78,18 @@ const App = () => {
               type={showPassword ? "text" : "password"}
               name="password"
               value={formData.password}
-              onChange={e => {
-                setError("")
-                handleChange(e.target)
+              onChange={(e) => {
+                setError("");
+                handleChange(e.target);
               }}
               placeholder="Password"
               className="border w-full py-3 pl-4"
             />
-            <button type="button" className="absolute top-3 right-4 uppercase font-semibold" onClick={()=> setShowPassword(prev => !prev)}>
+            <button
+              type="button"
+              className="absolute top-3 right-4 uppercase font-semibold"
+              onClick={() => setShowPassword((prev) => !prev)}
+            >
               {showPassword ? "hide" : "show"}
             </button>
           </div>
@@ -82,7 +102,11 @@ const App = () => {
               Forgot Password?
             </Link>
           </div>
-          <button type="submit" disabled={loading} className="disabled:bg-blue-600/50 disabled:cursor-not-allowed bg-blue-600 text-white p-3 text-5 font-semibold">
+          <button
+            type="submit"
+            disabled={loading}
+            className="disabled:bg-blue-600/50 disabled:cursor-not-allowed bg-blue-600 text-white p-3 text-5 font-semibold"
+          >
             Login
           </button>
         </form>

@@ -54,7 +54,7 @@ const UserMenu: React.FC = () => {
       {/* Dropdown Menu */}
       {isOpen && (
         <div
-          className="absolute right-0 mt-2 w-48 origin-top-right rounded-lg bg-white shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none z-50 animate-in fade-in zoom-in duration-150"
+          className="absolute right-0 mt-2 w-48 origin-top-right rounded-lg bg-white shadow-xl ring-1 ring-gray-300 focus:outline-none animate-in fade-in zoom-in duration-150"
           role="menu"
           aria-orientation="vertical"
         >
