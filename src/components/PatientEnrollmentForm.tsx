@@ -8,6 +8,8 @@ import { useScrollLock } from "../hooks/useScrollLock";
 interface PatientFormData {
   hospitalId: string;
   patientName: string;
+  email: string;
+  gender: string;
   phoneNumber: string;
   nextDeliveryDate: string;
   location: string;
@@ -22,7 +24,9 @@ const PatientEnrollmentForm = ({ isOpen }: { isOpen: boolean }) => {
   const [formData, setFormData] = useState<PatientFormData>({
     hospitalId: "",
     patientName: "",
+    email: "",
     phoneNumber: "",
+    gender: "",
     nextDeliveryDate: "",
     location: "",
     status: "Pending",
@@ -54,6 +58,8 @@ const PatientEnrollmentForm = ({ isOpen }: { isOpen: boolean }) => {
         hospitalId: "",
         patientName: "",
         phoneNumber: "",
+        email: "",
+        gender: "",
         nextDeliveryDate: "",
         location: "",
         status: "Pending",
@@ -86,6 +92,8 @@ const PatientEnrollmentForm = ({ isOpen }: { isOpen: boolean }) => {
     // Reset form after submission
     setFormData({
       hospitalId: "",
+      gender: "",
+      email: "",
       patientName: "",
       phoneNumber: "",
       nextDeliveryDate: "",
@@ -143,6 +151,26 @@ const PatientEnrollmentForm = ({ isOpen }: { isOpen: boolean }) => {
             />
           </div>
 
+          {/* Email Address (Newly Added) */}
+          <div>
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Email Address
+            </label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="e.g. patient@email.com"
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+
           {/* Phone Number */}
           <div>
             <label
@@ -161,6 +189,31 @@ const PatientEnrollmentForm = ({ isOpen }: { isOpen: boolean }) => {
               required
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
+          </div>
+
+          {/* Gender (Newly Added) */}
+          <div>
+            <label
+              htmlFor="gender"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Gender
+            </label>
+            <select
+              id="gender"
+              name="gender"
+              value={formData.gender}
+              onChange={handleChange}
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+            >
+              <option value="" disabled>
+                Select gender
+              </option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
+            </select>
           </div>
 
           {/* Next Delivery Date */}
@@ -200,28 +253,6 @@ const PatientEnrollmentForm = ({ isOpen }: { isOpen: boolean }) => {
               required
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
-          </div>
-
-          {/* Status */}
-          <div>
-            <label
-              htmlFor="status"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              Status
-            </label>
-            <select
-              id="status"
-              name="status"
-              value={formData.status}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-100"
-            >
-              <option value="Pending">Pending</option>
-              <option value="Active">Active</option>
-              <option value="Completed">Completed</option>
-              <option value="Cancelled">Cancelled</option>
-            </select>
           </div>
         </div>
 

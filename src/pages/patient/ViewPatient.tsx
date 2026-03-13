@@ -1,9 +1,10 @@
 import { Link } from "react-router";
 import { useParams } from "react-router";
 import SubHeader from "../../components/SubHeader";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Button from "../../components/Button";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { EditIcon } from "../../components/Icons";
 
 interface PatientData {
   hospitalId: string;
@@ -15,14 +16,28 @@ interface PatientData {
   paymentStatus: string;
 }
 
-
-
 const fetchPatientDetails = async (id: string): Promise<PatientData> => {
   // Replace this URL with your actual backend endpoint
-  const response = await fetch(`http://localhost:3000/api/patients/${id}`);
+  const response = await fetch(`http://192.168.1.75:3000/api/patients/${id}`);
   if (!response.ok) {
     console.log("An error occured");
     throw new Error("Failed to fetch patient data");
+  }
+
+  return response.json();
+};
+
+const updatePatientAPI = async ({ id, data }: { id: string; data: any }) => {
+  const response = await fetch(`http://192.168.1.75:3000/api/patients/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to update patient data");
   }
 
   return response.json();
@@ -32,10 +47,29 @@ const ViewPatient = () => {
   const [formEditable, setFormEditable] = useState(false);
   const { patientId } = useParams<{ patientId: string }>();
 
+  const focusRef = useRef<HTMLInputElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  const queryClient = useQueryClient();
+
   const { data, isLoading, isError } = useQuery({
     queryKey: ["patient", patientId],
     queryFn: () => fetchPatientDetails(patientId as string),
     enabled: !!patientId, // Only run if patientId exists
+  });
+
+  const mutation = useMutation({
+    mutationFn: updatePatientAPI,
+    onSuccess: () => {
+      // Magic happens here: This tells React Query the old data is stale,
+      // forcing it to instantly re-fetch the fresh data you just saved!
+      queryClient.invalidateQueries({ queryKey: ["patient", patientId] });
+      setFormEditable(false);
+      alert("Patient updated successfully!");
+    },
+    onError: (error) => {
+      alert(error.message);
+    },
   });
 
   const getStatusStyles = (status: string): string => {
@@ -43,18 +77,25 @@ const ViewPatient = () => {
       "px-3 py-2 text-[10px] font-bold inline-block w-24 text-center ";
 
     switch (status) {
-      case "Completed":
       case "Paid":
         return base + "bg-green-100 text-green-600";
-      case "Due & Paid":
-        return base + "bg-orange-100 text-orange-600";
-      case "Due & Unpaid":
+      case "Unpaid":
         return base + "bg-red-100 text-red-500";
-      case "Assigned":
-        return base + "bg-blue-100 text-blue-500";
       default:
         return base + "bg-gray-100 ";
     }
+  };
+
+  const handleSave = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const payload = Object.fromEntries(formData.entries());
+
+    // Trigger the API call
+    mutation.mutate({
+      id: patientId as string,
+      data: payload,
+    });
   };
 
   return (
@@ -67,7 +108,7 @@ const ViewPatient = () => {
           <span>/</span>
           <h1 className="text-2xl">View Patient</h1>
         </div>
-        <div className="flex gap-4 text-[#2A2A2A]">
+        <div className="flex max-sm:flex-col gap-4 text-[#2A2A2A]">
           <p className="flex flex-col">
             <span>Patient's next delivery date is</span>
             <span className="font-extrabold">
@@ -121,7 +162,9 @@ const ViewPatient = () => {
                     <span className="text-[14px] text-gray-700 font-medium">
                       Payment Status
                     </span>
-                    <span className={getStatusStyles(data?.paymentStatus || "")}>
+                    <span
+                      className={getStatusStyles(data?.paymentStatus || "")}
+                    >
                       {data?.paymentStatus || "Paid"}
                     </span>
                   </div>
@@ -150,27 +193,26 @@ const ViewPatient = () => {
 
                     <button
                       className="flex items-center justify-center gap-2 w-full text-blue-500 border-2 border-blue-400 py-2.5 font-bold text-[13px] hover:bg-blue-50 transition-colors"
-                      onClick={() => setFormEditable(true)}
+                      onClick={() => {
+                        setFormEditable(true);
+
+                        setTimeout(() => {
+                          focusRef.current?.focus();
+                        }, 0);
+                      }}
                     >
-                      <svg
-                        width="14"
-                        height="14"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M12 20h9"></path>
-                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-                      </svg>
+                      <EditIcon />
                       Edit Patient's Information
                     </button>
                   </div>
 
                   {/* Right Column (Form Grid) */}
-                  <div className="flex-1 flex flex-col gap-4">
+                  <form
+                    className="flex-1 flex flex-col gap-4"
+                    id="patient-update-form"
+                    onSubmit={handleSave}
+                    ref={formRef}
+                  >
                     {/* Full Width Field */}
                     {/* Full Width Field: Hospital ID */}
                     <label className="bg-[#f3f4f6] border border-gray-400 px-4 py-2.5 flex flex-col justify-center min-h-16 cursor-text has-disabled:cursor-not-allowed has-disabled:border-transparent focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 transition-all">
@@ -179,7 +221,9 @@ const ViewPatient = () => {
                       </span>
                       <input
                         type="text"
+                        name="hospitalId"
                         disabled={!formEditable}
+                        ref={focusRef}
                         defaultValue={data?.hospitalId}
                         className="text-[15px] text-gray-900 font-semibold mt-0.5 bg-transparent border-none outline-none focus:ring-0 p-0 w-full disabled:cursor-not-allowed"
                       />
@@ -193,6 +237,7 @@ const ViewPatient = () => {
                         </span>
                         <input
                           type="text"
+                          name="firstName"
                           disabled={!formEditable}
                           defaultValue={data?.firstName}
                           className="text-[15px] text-gray-900 font-semibold mt-0.5 bg-transparent border-none outline-none focus:ring-0 p-0 w-full disabled:cursor-not-allowed"
@@ -204,6 +249,7 @@ const ViewPatient = () => {
                         </span>
                         <input
                           type="text"
+                          name="lastName"
                           disabled={!formEditable}
                           defaultValue={data?.lastName}
                           className="text-[15px] text-gray-900 font-semibold mt-0.5 bg-transparent border-none outline-none focus:ring-0 p-0 w-full disabled:cursor-not-allowed"
@@ -219,6 +265,7 @@ const ViewPatient = () => {
                         <div className="relative mt-0.5 flex items-center">
                           <select
                             defaultValue={data?.gender}
+                            name="gender"
                             disabled={!formEditable}
                             className="text-[15px] text-gray-900 font-semibold bg-transparent border-none outline-none focus:ring-0 p-0 w-full appearance-none cursor-pointer disabled:cursor-not-allowed"
                           >
@@ -248,6 +295,7 @@ const ViewPatient = () => {
                         </span>
                         <input
                           type="tel"
+                          name="phoneNumber"
                           disabled={!formEditable}
                           defaultValue={data?.phoneNumber}
                           className="text-[15px] text-gray-900 font-semibold mt-0.5 bg-transparent border-none outline-none focus:ring-0 p-0 w-full disabled:cursor-not-allowed"
@@ -262,23 +310,20 @@ const ViewPatient = () => {
                       </span>
                       <input
                         type="email"
+                        name="email"
                         disabled={!formEditable}
                         defaultValue={data?.email}
                         className="text-[15px] text-gray-900 font-semibold mt-0.5 bg-transparent border-none outline-none focus:ring-0 p-0 w-full disabled:cursor-not-allowed"
                       />
                     </label>
-                  </div>
+                  </form>
                 </div>
 
                 {/* Footer */}
                 <div className="p-8 flex justify-end">
-                  {/* <button
-                className="bg-[#a5bdf6] hover:bg-[#8da8eb] text-white font-medium py-3 px-8 rounded-sm text-[15px] transition-colors"
-                disabled
-              >
-                Save Changes
-              </button> */}
-                  <Button disabled>Save Changes</Button>
+                  <Button disabled={!formEditable} form="patient-update-form">
+                    Save Changes
+                  </Button>
                 </div>
               </>
             )}

@@ -2,11 +2,16 @@ import React, { useState } from "react";
 import Pagination from "../../components/Pagination";
 import { Link } from "react-router";
 
-type DeliveryStatus =
+// 1. This is what comes directly from your MySQL database
+type RawDeliveryStatus = "Completed" | "Due" | "Assigned" | "Paid";
+type PaymentStatus = "Paid" | "Unpaid";
+
+// 2. This is the formatted text we actually show on the screen
+type DisplayStatus =
   | "Completed"
+  | "Assigned"
   | "Due & Paid"
   | "Due & Unpaid"
-  | "Assigned"
   | "Paid";
 
 interface PatientDelivery {
@@ -15,7 +20,8 @@ interface PatientDelivery {
   phoneNumber: string;
   nextDeliveryDate: string;
   location: string;
-  status: DeliveryStatus;
+  paymentStatus: PaymentStatus;
+  status: RawDeliveryStatus; // <-- Updated this
   id: string;
 }
 
@@ -32,8 +38,8 @@ const PatientTable: React.FC<PatientTableProps> = ({
   deliveries,
   setPage,
 }) => {
-  // Type-safe style mapper
-  const getStatusStyles = (status: DeliveryStatus): string => {
+  // 3. Update the styling function to expect the DisplayStatus
+  const getStatusStyles = (status: DisplayStatus): string => {
     const base =
       "px-3 py-2 text-[10px] font-bold inline-block w-24 text-center ";
 
@@ -53,10 +59,8 @@ const PatientTable: React.FC<PatientTableProps> = ({
   };
 
   const [currentPage, setCurrentPage] = useState(1);
-  // const totalPages = 8;
 
   const handlePageChange = (newPage: number) => {
-    // You can add your API fetching logic here
     setPage(newPage);
     setCurrentPage(newPage);
   };
@@ -66,6 +70,7 @@ const PatientTable: React.FC<PatientTableProps> = ({
       <div className="w-full bg-white shadow-sm overflow-x-auto">
         <table className="w-full text-left border-collapse border-spacing-0">
           <thead>
+            {/* ... Your exact thead code ... */}
             <tr className="border-b border-gray-100">
               {[
                 "Hospital ID",
@@ -86,30 +91,49 @@ const PatientTable: React.FC<PatientTableProps> = ({
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
-            {data.map((item, index) => (
-              <tr key={index} className="hover:bg-gray-50/50 transition-colors">
-                <td className="px-6 py-4 text-xs ">{item.hospitalId}</td>
-                <td className="px-6 py-4 text-xs font-semibold text-gray-700">
-                  {item.patientName}
-                </td>
-                <td className="px-6 py-4 text-xs ">{item.phoneNumber}</td>
-                <td className="px-6 py-4 text-xs ">{item.nextDeliveryDate}</td>
-                <td className="px-6 py-4 text-xs ">{item.location}</td>
-                <td className="px-6 py-4">
-                  <span className={getStatusStyles(item.status)}>
-                    {item.status}
-                  </span>
-                </td>
-                <td className="px-6 py-4 text-right">
-                  <Link
-                    to={`/dashboard/patient/${item.id}`}
-                    className="text-blue-500 border border-blue-200 px-5 py-1.5 hover:bg-blue-500 hover:text-white hover:border-blue-500 transition-all text-xs font-bold"
-                  >
-                    View
-                  </Link>
-                </td>
-              </tr>
-            ))}
+            {data.map((item, index) => {
+              // 4. Calculate the display text cleanly here!
+              let displayStatus: DisplayStatus;
+              if (item.status === "Due") {
+                displayStatus =
+                  item.paymentStatus === "Paid" ? "Due & Paid" : "Due & Unpaid";
+              } else {
+                displayStatus = item.status as DisplayStatus;
+              }
+
+              return (
+                <tr
+                  key={index}
+                  className="hover:bg-gray-50/50 transition-colors"
+                >
+                  <td className="px-6 py-4 text-xs ">{item.hospitalId}</td>
+                  <td className="px-6 py-4 text-xs font-semibold text-gray-700">
+                    {item.patientName}
+                  </td>
+                  <td className="px-6 py-4 text-xs ">{item.phoneNumber}</td>
+                  <td className="px-6 py-4 text-xs ">
+                    {item.nextDeliveryDate}
+                  </td>
+                  <td className="px-6 py-4 text-xs ">{item.location}</td>
+
+                  {/* 5. Use the clean variable for both the class and the text */}
+                  <td className="px-6 py-4">
+                    <span className={getStatusStyles(displayStatus)}>
+                      {displayStatus}
+                    </span>
+                  </td>
+
+                  <td className="px-6 py-4 text-right">
+                    <Link
+                      to={`/dashboard/patient/${item.id}`}
+                      className="text-blue-500 border border-blue-200 px-5 py-1.5 hover:bg-blue-500 hover:text-white hover:border-blue-500 transition-all text-xs font-bold"
+                    >
+                      View
+                    </Link>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
