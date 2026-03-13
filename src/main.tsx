@@ -19,7 +19,7 @@ createRoot(document.getElementById("root")!).render(
           <Route path="/" element={<App />} />  
           <Route path="dashboard" element={<Layout />}>
             <Route index element={<Patients />} />
-            <Route path="/dashboard/patient" element={<ViewPatient />} />
+            <Route path="/dashboard/patient/:patientId" element={<ViewPatient />} />
           </Route>
         </Routes>
       </BrowserRouter>

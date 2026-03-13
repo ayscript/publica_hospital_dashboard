@@ -1,12 +1,11 @@
-import React from 'react'
+import React from "react";
 
-// Use React.ReactNode for children
 const SubHeader = ({ children }: { children: React.ReactNode }) => {
   return (
-    <div className="border-b border-[#CFCFCF] py-6 px-[5%] flex items-center justify-between">
-        {children}
-      </div>
-  )
-}
+    <div className="border-b border-[#CFCFCF] py-6 px-[5%] flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      {children}
+    </div>
+  );
+};
 
-export default SubHeader
+export default SubHeader;

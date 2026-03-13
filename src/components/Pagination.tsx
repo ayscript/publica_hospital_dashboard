@@ -1,3 +1,5 @@
+import { ArrowLeft, ArrowRight } from "lucide-react";
+
 const Pagination = ({ currentPage, totalPages, onPageChange }: {currentPage: number, totalPages: number, onPageChange: (pageNum: number) => void}) => {
     const getPages = () => {
         const pages = [];
@@ -27,15 +29,16 @@ const Pagination = ({ currentPage, totalPages, onPageChange }: {currentPage: num
     const pages = getPages();
 
     return (
-        <div className="flex items-center space-x-1 text-sm text-gray-500">
+        <div className="flex items-center space-x-1 text-xs text-gray-500">
             {/* Prev Button */}
             <button
                 onClick={() => onPageChange(currentPage - 1)}
                 disabled={currentPage === 1}
-                className={`px-4 py-1.5 rounded-full border border-gray-300 transition-colors 
+                aria-label="previous"
+                className={`w-8 h-8 flex items-center justify-center rounded-full border border-gray-300 transition-colors 
           ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-50 text-gray-600'}`}
             >
-                Prev
+                <ArrowLeft className="w-3" />
             </button>
 
             {/* Page Numbers */}
@@ -43,7 +46,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }: {currentPage: num
                 {pages.map((page, index) => {
                     if (page === '...') {
                         return (
-                            <span key={`ellipsis-${index}`} className="px-2 tracking-widest text-gray-400">
+                            <span key={`ellipsis-${index}`} className="px-0 tracking-widest text-gray-400">
                                 ...
                             </span>
                         );
@@ -71,10 +74,11 @@ const Pagination = ({ currentPage, totalPages, onPageChange }: {currentPage: num
             <button
                 onClick={() => onPageChange(currentPage + 1)}
                 disabled={currentPage === totalPages}
-                className={`px-4 py-1.5 rounded-full border border-gray-300 transition-colors 
+                aria-label="next"
+                className={`w-8 h-8 flex items-center justify-center rounded-full border border-gray-300 transition-colors 
           ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-50 text-gray-600'}`}
             >
-                Next
+                <ArrowRight className="w-3" />
             </button>
         </div>
     );
