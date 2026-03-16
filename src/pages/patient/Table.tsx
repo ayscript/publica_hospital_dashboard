@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import Pagination from "../../components/Pagination";
 import { Link } from "react-router";
+import TableDataSkeleton from "../../components/TableDataSkeleton";
 
 // 1. This is what comes directly from your MySQL database
 type RawDeliveryStatus = "Completed" | "Due" | "Assigned" | "Paid";
@@ -29,6 +30,7 @@ interface PatientTableProps {
   data: PatientDelivery[];
   totalPages: number;
   deliveries: number;
+  isLoading: boolean;
   setPage: React.Dispatch<React.SetStateAction<number>>;
 }
 
@@ -36,6 +38,7 @@ const PatientTable: React.FC<PatientTableProps> = ({
   data,
   totalPages,
   deliveries,
+  isLoading,
   setPage,
 }) => {
   // 3. Update the styling function to expect the DisplayStatus
@@ -70,7 +73,6 @@ const PatientTable: React.FC<PatientTableProps> = ({
       <div className="w-full bg-white shadow-sm overflow-x-auto">
         <table className="w-full text-left border-collapse border-spacing-0">
           <thead>
-            {/* ... Your exact thead code ... */}
             <tr className="border-b border-gray-100">
               {[
                 "Hospital ID",
@@ -91,49 +93,55 @@ const PatientTable: React.FC<PatientTableProps> = ({
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
-            {data.map((item, index) => {
-              // 4. Calculate the display text cleanly here!
-              let displayStatus: DisplayStatus;
-              if (item.status === "Due") {
-                displayStatus =
-                  item.paymentStatus === "Paid" ? "Due & Paid" : "Due & Unpaid";
-              } else {
-                displayStatus = item.status as DisplayStatus;
-              }
+            {!isLoading
+              ? data.map((item, index) => {
+                  // 4. Calculate the display text cleanly here!
+                  let displayStatus: DisplayStatus;
+                  if (item.status === "Due") {
+                    displayStatus =
+                      item.paymentStatus === "Paid"
+                        ? "Due & Paid"
+                        : "Due & Unpaid";
+                  } else {
+                    displayStatus = item.status as DisplayStatus;
+                  }
 
-              return (
-                <tr
-                  key={index}
-                  className="hover:bg-gray-50/50 transition-colors"
-                >
-                  <td className="px-6 py-4 text-xs ">{item.hospitalId}</td>
-                  <td className="px-6 py-4 text-xs font-semibold text-gray-700">
-                    {item.patientName}
-                  </td>
-                  <td className="px-6 py-4 text-xs ">{item.phoneNumber}</td>
-                  <td className="px-6 py-4 text-xs ">
-                    {item.nextDeliveryDate}
-                  </td>
-                  <td className="px-6 py-4 text-xs ">{item.location}</td>
-
-                  {/* 5. Use the clean variable for both the class and the text */}
-                  <td className="px-6 py-4">
-                    <span className={getStatusStyles(displayStatus)}>
-                      {displayStatus}
-                    </span>
-                  </td>
-
-                  <td className="px-6 py-4 text-right">
-                    <Link
-                      to={`/dashboard/patient/${item.id}`}
-                      className="text-blue-500 border border-blue-200 px-5 py-1.5 hover:bg-blue-500 hover:text-white hover:border-blue-500 transition-all text-xs font-bold"
+                  return (
+                    <tr
+                      key={index}
+                      className="hover:bg-gray-50/50 transition-colors"
                     >
-                      View
-                    </Link>
-                  </td>
-                </tr>
-              );
-            })}
+                      <td className="px-6 py-4 text-xs ">{item.hospitalId}</td>
+                      <td className="px-6 py-4 text-xs font-semibold text-gray-700">
+                        {item.patientName}
+                      </td>
+                      <td className="px-6 py-4 text-xs ">{item.phoneNumber}</td>
+                      <td className="px-6 py-4 text-xs ">
+                        {item.nextDeliveryDate}
+                      </td>
+                      <td className="px-6 py-4 text-xs ">{item.location}</td>
+
+                      {/* 5. Use the clean variable for both the class and the text */}
+                      <td className="px-6 py-4">
+                        <span className={getStatusStyles(displayStatus)}>
+                          {displayStatus}
+                        </span>
+                      </td>
+
+                      <td className="px-6 py-4 text-right">
+                        <Link
+                          to={`/dashboard/patient/${item.id}`}
+                          className="text-blue-500 border border-blue-200 px-5 py-1.5 hover:bg-blue-500 hover:text-white hover:border-blue-500 transition-all text-xs font-bold"
+                        >
+                          View
+                        </Link>
+                      </td>
+                    </tr>
+                  );
+                })
+              : [...Array(5)].map((_, index) => (
+                  <TableDataSkeleton key={index} />
+                ))}
           </tbody>
         </table>
       </div>

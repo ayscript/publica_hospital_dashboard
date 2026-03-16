@@ -18,7 +18,7 @@ interface PatientData {
 
 const fetchPatientDetails = async (id: string): Promise<PatientData> => {
   // Replace this URL with your actual backend endpoint
-  const response = await fetch(`http://192.168.1.75:3000/api/patients/${id}`);
+  const response = await fetch(`http://localhost:3000/api/patients/${id}`);
   if (!response.ok) {
     console.log("An error occured");
     throw new Error("Failed to fetch patient data");
@@ -28,7 +28,7 @@ const fetchPatientDetails = async (id: string): Promise<PatientData> => {
 };
 
 const updatePatientAPI = async ({ id, data }: { id: string; data: any }) => {
-  const response = await fetch(`http://192.168.1.75:3000/api/patients/${id}`, {
+  const response = await fetch(`http://localhost:3000/api/patients/${id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",

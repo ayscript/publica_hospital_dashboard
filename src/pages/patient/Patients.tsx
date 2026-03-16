@@ -100,6 +100,7 @@ const Patients = () => {
             data={data.data}
             totalPages={data.totalPages}
             deliveries={data.deliveries}
+            isLoading={isLoading}
             setPage={setPage}
           />
         </div>
