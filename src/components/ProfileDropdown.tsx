@@ -1,8 +1,14 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router";
+import { useAuthStore } from "../store/authStore";
 
 const UserMenu: React.FC = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const menuRef = useRef<HTMLDivElement>(null);
+    const { reset } = useAuthStore();
+
+
+  const navigate = useNavigate();
 
   // Toggle dropdown
   const toggleMenu = (): void => setIsOpen((prev) => !prev);
@@ -21,7 +27,9 @@ const UserMenu: React.FC = () => {
 
   const handleLogout = (): void => {
     // Logic for your simulation
-    localStorage.removeItem("accessToken");
+    localStorage.removeItem("auth_token");
+    reset()
+    navigate("/");
   };
 
   return (

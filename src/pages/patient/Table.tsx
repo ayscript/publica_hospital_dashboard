@@ -117,7 +117,7 @@ const PatientTable: React.FC<PatientTableProps> = ({
                       </td>
                       <td className="px-6 py-4 text-xs ">{item.phoneNumber}</td>
                       <td className="px-6 py-4 text-xs ">
-                        {item.nextDeliveryDate}
+                        {new Date(item.nextDeliveryDate).toLocaleDateString()}
                       </td>
                       <td className="px-6 py-4 text-xs ">{item.location}</td>
 
