@@ -30,7 +30,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
 
       try {
-        const response = await fetch("http://localhost:3000/api/auth/profile", {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/profile`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

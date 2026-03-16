@@ -38,7 +38,7 @@ export const useAuthStore = create<AuthType>((set) => ({
 
     try {
       // Ping your API to verify the token is still valid
-      const response = await fetch("http://localhost:3000/api/auth/profile", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/profile`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -50,7 +50,7 @@ export const useAuthStore = create<AuthType>((set) => ({
         set({ user: userData, loading: false });
       } else {
         // Token is expired or invalid. Clean it up.
-        localStorage.removeItem("token");
+        localStorage.removeItem("auth_token");
         set({ user: null, loading: false });
       }
     } catch (error) {
@@ -60,7 +60,7 @@ export const useAuthStore = create<AuthType>((set) => ({
   },
   login: async (email: string, password: string) => {
     set({ loading: true });
-    const response = await fetch(" http://localhost:3000/api/auth/login", {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
