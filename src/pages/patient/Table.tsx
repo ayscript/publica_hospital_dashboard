@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Pagination from "../../components/Pagination";
 import { Link } from "react-router";
 import TableDataSkeleton from "../../components/TableDataSkeleton";
+import { usePaginationStore } from "../../store/paginationStore";
 
 // 1. This is what comes directly from your MySQL database
 type RawDeliveryStatus = "Completed" | "Due" | "Assigned" | "Paid";
@@ -31,7 +32,6 @@ interface PatientTableProps {
   totalPages: number;
   deliveries: number;
   isLoading: boolean;
-  setPage: React.Dispatch<React.SetStateAction<number>>;
 }
 
 const PatientTable: React.FC<PatientTableProps> = ({
@@ -39,9 +39,9 @@ const PatientTable: React.FC<PatientTableProps> = ({
   totalPages,
   deliveries,
   isLoading,
-  setPage,
 }) => {
-  // 3. Update the styling function to expect the DisplayStatus
+  const {page, setPage} = usePaginationStore();
+  
   const getStatusStyles = (status: DisplayStatus): string => {
     const base =
       "px-3 py-2 text-[10px] font-bold inline-block w-24 text-center ";
@@ -61,7 +61,7 @@ const PatientTable: React.FC<PatientTableProps> = ({
     }
   };
 
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(page || 1);
 
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
@@ -148,7 +148,7 @@ const PatientTable: React.FC<PatientTableProps> = ({
       <div className="flex flex-wrap items-center justify-between border-t border-gray-50 bg-white">
         <div className="px-4 py-4 text-xs text-gray-500">
           <p>
-            You're viewing {data.length} out of {deliveries || ""} deliveries
+            You're viewing {data.length} out of {deliveries || 0} deliveries
           </p>
         </div>
         <div className="px-6 py-4 text-xs text-gray-500">

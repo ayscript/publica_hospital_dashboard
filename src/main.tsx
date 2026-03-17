@@ -10,6 +10,7 @@ import Layout from './pages/patient/Layout';
 import Patients from './pages/patient/Patients';
 import ViewPatient from './pages/patient/ViewPatient';
 import { useAuthStore } from './store/authStore';
+import SuccessfulDeliveries from './pages/deliveries/DeliveriesLayout';
 // ... other imports
 
 const queryClient = new QueryClient();
@@ -34,6 +35,8 @@ const RootApp = () => {
             <Route path="dashboard" element={<Layout />}>
               <Route index element={<Patients />} />
               <Route path="patient/:patientId" element={<ViewPatient />} />
+              <Route path="delivery" element={<SuccessfulDeliveries />} />
+              <Route path="*" element={<h1>Page not found</h1>} />
             </Route>
           </Route>
         </Routes>

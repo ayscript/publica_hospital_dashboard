@@ -5,11 +5,15 @@ import { PatientSkeleton } from "../../components/loading/PatientLoading";
 import PatientTable from "./Table";
 import { Lens } from "../../components/Icons";
 import PatientEnrollmentForm from "../../components/PatientEnrollmentForm";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useFocusTrap } from "../../hooks/usFocusTrap";
+import { usePaginationStore } from "../../store/paginationStore";
 
 const Patients = () => {
-  const [page, setPage] = useState(1);
+  // const [page, setPage] = useState(1);
+  const { page, setPage, searchTerm, setSearchTerm } = usePaginationStore();
+  // const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const modalRef = useRef<HTMLDivElement>(null);
 
   const {
@@ -19,11 +23,23 @@ const Patients = () => {
     isError,
   }: { data: any; isLoading: boolean; error: any; isError: boolean } = useQuery(
     {
-      queryKey: ["patients", page],
-      queryFn: () => api.get(`/patients?page=${page}`),
+      queryKey: ["patients", page, debouncedSearch],
+      queryFn: () =>
+        api.get(`/patients?page=${page}&search=${debouncedSearch}`),
       placeholderData: (previousData) => previousData,
     },
   );
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+      if (searchTerm) {
+        setPage(1);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
 
   const [showEnrollmentForm, setShowEnrollmentForm] = useState(false);
 
@@ -93,6 +109,8 @@ const Patients = () => {
                 type="search"
                 placeholder="Search by patient name, id"
                 className="ml-auto border border-gray-400 placeholder:text-sm px-4 py-2 pl-8 w-full"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
           </div>
@@ -101,7 +119,6 @@ const Patients = () => {
             totalPages={data.totalPages}
             deliveries={data.deliveries}
             isLoading={isLoading}
-            setPage={setPage}
           />
         </div>
       )}

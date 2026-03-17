@@ -6,6 +6,7 @@ import Button from "../../components/Button";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { EditIcon } from "../../components/Icons";
 import DeliveryInformation from "./DeliveryInfo";
+import { Bounce, toast, ToastContainer } from "react-toastify";
 
 interface PatientData {
   hospitalId: string;
@@ -74,7 +75,17 @@ const ViewPatient = () => {
       // forcing it to instantly re-fetch the fresh data you just saved!
       queryClient.invalidateQueries({ queryKey: ["patient", patientId] });
       setFormEditable(false);
-      alert("Patient updated successfully!");
+      toast.success("Patient updated successfully!", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        transition: Bounce,
+      });
     },
     onError: (error) => {
       alert(error.message);
@@ -346,12 +357,27 @@ const ViewPatient = () => {
                       </Button>
                     </div>
                   </>
-                ) : <DeliveryInformation />}
+                ) : (
+                  <DeliveryInformation />
+                )}
               </>
             )}
           </main>
         </div>
       </div>
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        transition={Bounce}
+      />
     </div>
   );
 };
